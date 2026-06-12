@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Sommarläsning!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFD93D;
+      --orange: #FF6B35;
+      --blue: #4ECDC4;
+      --sky: #74B9FF;
+      --green: #6BCB77;
+      --pink: #FF8FAB;
+      --purple: #C77DFF;
+      --bg: #FFF9F0;
+      --card: #FFFFFF;
+      --text: #2D3436;
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    h1, h2, h3, .logo { font-family: 'Fredoka One', cursive; }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+    .logo { font-size: 1.8rem; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
+    .logo span { font-size: 1.4rem; }
+
+    /* PLAYER SWITCH */
+    .player-tabs {
+      display: flex; gap: 8px;
+    }
+    .player-tab {
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 3px solid white;
+      background: transparent;
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .player-tab.active {
+      background: white;
+      color: var(--orange);
+    }
+
+    /* MAIN LAYOUT */
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+    /* SECTIONS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white;
+      display: flex;
+      border-top: 2px solid #f0f0f0;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+    }
+    .nav-btn {
+      flex: 1; padding: 12px 4px 10px;
+      border: none; background: transparent;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #aaa;
+      transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .nav-btn .icon { font-size: 1.5rem; }
+    .nav-btn.active { color: var(--orange); }
+    .nav-btn.active .icon { transform: scale(1.2); }
+
+    main { padding-bottom: 80px; }
+
+    /* CARDS */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+    .card h2 { font-size: 1.3rem; margin-bottom: 12px; }
+
+    /* PROGRESS */
+    .progress-wrap { margin: 8px 0 4px; }
+    .progress-label { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; }
+    .progress-bar {
+      height: 22px; background: #f0f0f0; border-radius: 50px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 50px;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width 0.6s cubic-bezier(.34,1.56,.64,1);
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+      font-size: 0.75rem; font-weight: 800; color: white;
+    }
+
+    /* STATS ROW */
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-box {
+      flex: 1; min-width: 90px;
+      background: linear-gradient(135deg, var(--yellow), var(--orange));
+      border-radius: 16px;
+      padding: 14px 12px;
+      text-align: center;
+      color: white;
+    }
+    .stat-box.blue { background: linear-gradient(135deg, var(--sky), var(--blue)); }
+    .stat-box.green { background: linear-gradient(135deg, #96E9C6, var(--green)); }
+    .stat-num { font-family: 'Fredoka One', cursive; font-size: 2rem; }
+    .stat-label { font-size: 0.75rem; font-weight: 700; opacity: 0.9; }
+
+    /* BADGES */
+    .badges-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .badge {
+      text-align: center; padding: 12px;
+      border-radius: 16px;
+      background: #f8f8f8;
+      border: 3px solid #eee;
+      opacity: 0.4;
+      transition: all 0.3s;
+      min-width: 80px;
+    }
+    .badge.earned {
+      opacity: 1;
+      background: linear-gradient(135deg, #fff9c4, #fff3e0);
+      border-color: var(--yellow);
+      box-shadow: 0 4px 12px rgba(255,217,61,0.4);
+    }
+    .badge .badge-icon { font-size: 2rem; }
+    .badge .badge-name { font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
+
+    /* FORM */
+    .form-grid { display: grid; gap: 12px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 12px 14px;
+      border: 2px solid #e8e8e8; border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem; font-weight: 600;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--orange); background: white;
+    }
+    textarea { resize: vertical; min-height: 70px; }
+    .star-input { display: flex; gap: 6px; }
+    .star-btn {
+      font-size: 1.8rem; background: none; border: none; cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .star-btn:hover, .star-btn.on { transform: scale(1.3); }
+
+    /* BUTTONS */
+    .btn {
+      padding: 14px 28px;
+      border: none; border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange), #FF4500);
+      color: white;
+      box-shadow: 0 4px 14px rgba(255,107,53,0.4);
+      width: 100%; margin-top: 8px;
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(255,107,53,0.5); transform: translateY(-1px); }
+    .btn-quiz {
+      width: 100%; padding: 16px; margin-top: 10px;
+      font-size: 1.1rem; background: white;
+      border: 3px solid #eee; border-radius: 16px;
+      cursor: pointer; font-family: 'Nunito', sans-serif;
+      font-weight: 700; text-align: left;
+      transition: all 0.2s;
+    }
+    .btn-quiz:hover { border-color: var(--blue); background: #f0fdfc; }
+    .btn-quiz.selected { border-color: var(--orange); background: #fff5f0; color: var(--orange); }
+
+    /* BOOK LIST */
+    .book-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px; background: #fafafa;
+      border-radius: 14px; margin-bottom: 10px;
+      border: 2px solid #f0f0f0;
+    }
+    .book-cover {
+      width: 48px; height: 64px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; flex-shrink: 0;
+    }
+    .book-info { flex: 1; }
+    .book-title { font-weight: 800; font-size: 1rem; }
+    .book-meta { font-size: 0.8rem; color: #888; margin-top: 2px; }
+    .book-stars { font-size: 1rem; margin-top: 4px; }
+    .book-note { font-size: 0.85rem; color: #666; margin-top: 4px; font-style: italic; }
+    .delete-btn {
+      background: none; border: none; cursor: pointer; font-size: 1.2rem;
+      opacity: 0.4; transition: opacity 0.2s; padding: 4px;
+    }
+    .delete-btn:hover { opacity: 1; }
+
+    /* QUIZ */
+    .quiz-progress { font-weight: 700; color: #888; margin-bottom: 16px; font-size: 0.9rem; }
+    .quiz-question { font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.4; }
+    .quiz-result {
+      text-align: center; padding: 24px 16px;
+    }
+    .quiz-result .big-emoji { font-size: 5rem; margin-bottom: 12px; }
+    .quiz-result h2 { font-size: 1.6rem; margin-bottom: 8px; }
+    .quiz-result p { color: #666; line-height: 1.6; }
+    .genre-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center; }
+    .genre-tag {
+      padding: 8px 16px; border-radius: 50px;
+      font-weight: 700; font-size: 0.9rem;
+      background: linear-gradient(135deg, var(--sky), var(--blue));
+      color: white;
+    }
+
+    /* GOAL SETTING */
+    .goal-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .goal-row input { max-width: 80px; text-align: center; }
+
+    /* CELEBRATION */
+    .celebration {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+    .celebration.show { display: flex; }
+    .celebration-box {
+      background: white; border-radius: 24px; padding: 40px 32px;
+      text-align: center; max-width: 360px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .celebration-box .emoji { font-size: 4rem; margin-bottom: 12px; }
+    .celebration-box h2 { font-size: 1.8rem; margin-bottom: 8px; color: var(--orange); }
+    .celebration-box p { color: #666; margin-bottom: 20px; }
+
+    /* SETUP */
+    .setup-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #FFD93D, #FF6B35);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+    .setup-overlay.show { display: flex; }
+    .setup-box {
+      background: white; border-radius: 28px; padding: 36px 28px;
+      max-width: 400px; width: 90%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .setup-box .emoji { font-size: 4rem; margin-bottom: 12px; }
+    .setup-box h2 { font-size: 1.6rem; margin-bottom: 8px; }
+    .setup-box p { color: #888; margin-bottom: 24px; }
+    .setup-inputs { display: grid; gap: 16px; margin-bottom: 24px; }
+    .setup-player { text-align: left; }
+    .setup-player label { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 40px 20px; color: #bbb; }
+    .empty-state .emoji { font-size: 3.5rem; margin-bottom: 12px; }
+    .empty-state p { font-weight: 700; font-size: 1.1rem; }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .stats-row { gap: 8px; }
+      .stat-box { min-width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SETUP OVERLAY -->
+<div class="setup-overlay show" id="setupOverlay">
+  <div class="setup-box">
+    <div class="emoji">📚☀️</div>
+    <h2>Välkommen till<br>Sommarläsning!</h2>
+    <p>Skriv namnen på de som ska läsa i sommar!</p>
+    <div class="setup-inputs">
+      <div class="setup-player">
+        <label>🧒 Läsare 1</label>
+        <input type="text" id="setupName1" placeholder="Skriv namn..." maxlength="20">
+      </div>
+      <div class="setup-player">
+        <label>🧒 Läsare 2</label>
+        <input type="text" id="setupName2" placeholder="Skriv namn..." maxlength="20">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSetup()">🚀 Starta äventyret!</button>
+  </div>
+</div>
+
+<!-- CELEBRATION OVERLAY -->
+<div class="celebration" id="celebration">
+  <div class="celebration-box">
+    <div class="emoji" id="celebEmoji">🎉</div>
+    <h2 id="celebTitle">Wow!</h2>
+    <p id="celebText">Bra jobbat!</p>
+    <button class="btn btn-primary" onclick="closeCelebration()">🥳 Tack!</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">📚 <span>Sommarläsning</span></div>
+  <div class="player-tabs">
+    <button class="player-tab active" id="tab1" onclick="switchPlayer(0)">P1</button>
+    <button class="player-tab" id="tab2" onclick="switchPlayer(1)">P2</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HOME SECTION -->
+  <div class="section active" id="sec-home">
+    <div class="card">
+      <h2 id="homeGreeting">⭐ Hej!</h2>
+      <div id="homeProgress"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="statBooks">0</div>
+        <div class="stat-label">Böcker 📖</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-num" id="statPages">0</div>
+        <div class="stat-label">Sidor 📄</div>
+      </div>
+      <div class="stat-box green">
+        <div class="stat-num" id="statPoints">0</div>
+        <div class="stat-label">Poäng ⭐</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🏅 Dina märken</h2>
+      <div class="badges-row" id="badgesRow"></div>
+    </div>
+    <div class="card">
+      <h2>🎯 Ändra mål</h2>
+      <div class="goal-row">
+        <label>Mål: läs</label>
+        <input type="number" id="goalInput" min="1" max="50" value="10" style="max-width:70px;text-align:center">
+        <label>böcker denna sommar</label>
+        <button class="btn btn-primary" style="width:auto;margin:0" onclick="saveGoal()">Spara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD BOOK SECTION -->
+  <div class="section" id="sec-add">
+    <div class="card">
+      <h2>➕ Lägg till bok</h2>
+      <div class="form-grid">
+        <div>
+          <label>📖 Bokens titel</label>
+          <input type="text" id="bookTitle" placeholder="T.ex. Alfons Åberg...">
+        </div>
+        <div>
+          <label>🏷️ Genre</label>
+          <select id="bookGenre">
+            <option value="fantasy">🧙 Fantasy & magi</option>
+            <option value="äventyr">🗺️ Äventyr</option>
+            <option value="humor">😂 Humor & komedie</option>
+            <option value="fakta">🔬 Fakta</option>
+            <option value="sport">⚽ Sport</option>
+            <option value="djur">🐾 Djur & natur</option>
+            <option value="skräck">👻 Skräck & spänning</option>
+            <option value="deckare">🔍 Deckare & mysterier</option>
+            <option value="sci-fi">🚀 Sci-fi & rymd</option>
+          </select>
+        </div>
+        <div>
+          <label>📄 Antal sidor</label>
+          <input type="number" id="bookPages" placeholder="T.ex. 128" min="1">
+        </div>
+        <div>
+          <label>⭐ Betyg</label>
+          <div class="star-input" id="starInput">
+            <button class="star-btn" data-val="1" onclick="setRating(1)">☆</button>
+            <button class="star-btn" data-val="2" onclick="setRating(2)">☆</button>
+            <button class="star-btn" data-val="3" onclick="setRating(3)">☆</button>
+            <button class="star-btn" data-val="4" onclick="setRating(4)">☆</button>
+            <button class="star-btn" data-val="5" onclick="setRating(5)">☆</button>
+          </div>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>💬 Vad tyckte du? (valfritt)</label>
+          <textarea id="bookNote" placeholder="T.ex. Den var rolig! Jag gillade äventyren..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addBook()">📚 Lägg till boken!</button>
+    </div>
+  </div>
+
+  <!-- BOOKS LIST SECTION -->
+  <div class="section" id="sec-books">
+    <div class="card" id="bookListCard">
+      <h2>📚 Mina böcker</h2>
+      <div id="bookList"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ SECTION -->
+  <div class="section" id="sec-quiz">
+    <div class="card" id="quizCard">
+      <div id="quizContent"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showSection('home')">
+    <span class="icon">🏠</span>Hem
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="showSection('add')">
+    <span class="icon">➕</span>Lägg till
+  </button>
+  <button class="nav-btn" id="nav-books" onclick="showSection('books')">
+    <span class="icon">📚</span>Böcker
+  </button>
+  <button class="nav-btn" id="nav-quiz" onclick="showSection('quiz'); startQuiz()">
+    <span class="icon">🎮</span>Quiz
+  </button>
+</nav>
+
+<script>
+// ---- DATA ----
+const BADGES = [
+  { id: 'first', threshold: 1, icon: '🌱', name: 'Första boken!' },
+  { id: 'three', threshold: 3, icon: '🔥', name: '3 böcker!' },
+  { id: 'five', threshold: 5, icon: '⭐', name: '5 böcker!' },
+  { id: 'seven', threshold: 7, icon: '🚀', name: '7 böcker!' },
+  { id: 'ten', threshold: 10, icon: '👑', name: '10 böcker!' },
+  { id: 'fifteen', threshold: 15, icon: '🏆', name: '15 böcker!' },
+];
+
+const GENRE_COLORS = {
+  fantasy: '#C77DFF', äventyr: '#FF6B35', humor: '#FFD93D',
+  fakta: '#4ECDC4', sport: '#6BCB77', djur: '#FF8FAB',
+  skräck: '#8B8BFF', deckare: '#74B9FF', 'sci-fi': '#A8DADC'
+};
+
+const GENRE_ICONS = {
+  fantasy: '🧙', äventyr: '🗺️', humor: '😂', fakta: '🔬',
+  sport: '⚽', djur: '🐾', skräck: '👻', deckare: '🔍', 'sci-fi': '🚀'
+};
+
+const QUIZ_QUESTIONS = [
+  {
+    q: "Om du fick bestämma, vad handlar din drömbok om?",
+    options: [
+      { text: "🧙 Magi, drakar och fantasy-världar", tags: ['fantasy'] },
+      { text: "🗺️ Spännande äventyr och farliga resor", tags: ['äventyr'] },
+      { text: "😂 Roliga grejer som gör mig garv-skrattande", tags: ['humor'] },
+      { text: "🔬 Häftiga fakta och hur saker fungerar", tags: ['fakta'] },
+    ]
+  },
+  {
+    q: "Vilket av dessa låter coolast att göra på en ledig dag?",
+    options: [
+      { text: "⚽ Spela fotboll eller idrott", tags: ['sport'] },
+      { text: "👻 Se en skrämmande film", tags: ['skräck'] },
+      { text: "🔍 Lösa ett mysterium med ledtrådar", tags: ['deckare'] },
+      { text: "🚀 Åka ut i rymden", tags: ['sci-fi'] },
+    ]
+  },
+  {
+    q: "Vilken typ av hjälte gillar du mest?",
+    options: [
+      { text: "🧙 En trollkarl med magiska krafter", tags: ['fantasy'] },
+      { text: "🐕 En djurhjälte som räddar dagen", tags: ['djur'] },
+      { text: "🕵️ En ung detektiv som löser brott", tags: ['deckare'] },
+      { text: "🤪 En tokig klumsig clown-typ", tags: ['humor'] },
+    ]
+  },
+  {
+    q: "Vad ska det ABSOLUT finnas i boken?",
+    options: [
+      { text: "💥 Action och spänning", tags: ['äventyr', 'skräck'] },
+      { text: "🤝 En grym bästa vän", tags: ['humor', 'äventyr'] },
+      { text: "🐉 Fantastiska monster eller varelser", tags: ['fantasy', 'sci-fi'] },
+      { text: "📊 Spännande fakta och riktiga saker", tags: ['fakta', 'sport'] },
+    ]
+  },
+  {
+    q: "Vilken plats låter coolast för bokens miljö?",
+    options: [
+      { text: "🏰 Ett gammalt slott med hemligheter", tags: ['fantasy', 'deckare'] },
+      { text: "🌋 En djungel eller ett vulkanöland", tags: ['äventyr'] },
+      { text: "🏟️ En stor stadion eller sportevent", tags: ['sport'] },
+      { text: "🌌 En rymdbas på en annan planet", tags: ['sci-fi'] },
+    ]
+  },
+  {
+    q: "Vad säger dina vänner om dig?",
+    options: [
+      { text: "😂 Att jag alltid är rolig och gör folk glada", tags: ['humor'] },
+      { text: "🦁 Att jag är modig och gillar utmaningar", tags: ['äventyr', 'skräck'] },
+      { text: "🧠 Att jag är smart och nyfiken", tags: ['fakta', 'deckare'] },
+      { text: "💫 Att jag har en galen fantasi", tags: ['fantasy', 'sci-fi'] },
+    ]
+  },
+];
+
+// ---- STATE ----
+let currentPlayer = 0;
+let currentRating = 0;
+let quizAnswers = [];
+let quizStep = 0;
+
+function defaultPlayer(name) {
+  return { name, books: [], goal: 10 };
+}
+
+function loadState() {
+  const raw = localStorage.getItem('sommarlasning_v2');
+  if (raw) return JSON.parse(raw);
+  return { players: [defaultPlayer('Spelare 1'), defaultPlayer('Spelare 2')], setup: false };
+}
+
+function saveState(state) {
+  localStorage.setItem('sommarlasning_v2', JSON.stringify(state));
+}
+
+let state = loadState();
+
+// ---- SETUP ----
+window.onload = function() {
+  if (!state.setup) {
+    document.getElementById('setupOverlay').classList.add('show');
+  } else {
+    init();
+  }
+};
+
+function saveSetup() {
+  const n1 = document.getElementById('setupName1').value.trim() || 'Spelare 1';
+  const n2 = document.getElementById('setupName2').value.trim() || 'Spelare 2';
+  state.players[0].name = n1;
+  state.players[1].name = n2;
+  state.setup = true;
+  saveState(state);
+  document.getElementById('setupOverlay').classList.remove('show');
+  init();
+}
+
+function init() {
+  updatePlayerTabs();
+  renderHome();
+  renderBookList();
+}
+
+// ---- PLAYER ----
+function switchPlayer(idx) {
+  currentPlayer = idx;
+  updatePlayerTabs();
+  renderHome();
+  renderBookList();
+}
+
+function updatePlayerTabs() {
+  const p = state.players;
+  document.getElementById('tab1').textContent = p[0].name.length > 8 ? p[0].name.substring(0,8)+'…' : p[0].name;
+  document.getElementById('tab2').textContent = p[1].name.length > 8 ? p[1].name.substring(0,8)+'…' : p[1].name;
+  document.getElementById('tab1').classList.toggle('active', currentPlayer === 0);
+  document.getElementById('tab2').classList.toggle('active', currentPlayer === 1);
+}
+
+// ---- NAVIGATION ----
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+}
+
+// ---- HOME ----
+function renderHome() {
+  const p = state.players[currentPlayer];
+  const bookCount = p.books.length;
+  const totalPages = p.books.reduce((s, b) => s + (b.pages || 0), 0);
+  const totalPoints = calcPoints(p.books);
+  const pct = Math.min(100, Math.round((bookCount / p.goal) * 100));
+
+  document.getElementById('homeGreeting').textContent = `⭐ Hej ${p.name}!`;
+  document.getElementById('goalInput').value = p.goal;
+
+  const progressHTML = `
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Utmaning: ${bookCount} av ${p.goal} böcker</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${pct}%">${pct > 10 ? pct+'%' : ''}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('homeProgress').innerHTML = progressHTML;
+
+  document.getElementById('statBooks').textContent = bookCount;
+  document.getElementById('statPages').textContent = totalPages;
+  document.getElementById('statPoints').textContent = totalPoints;
+
+  renderBadges(bookCount);
+}
+
+function calcPoints(books) {
+  return books.reduce((s, b) => {
+    let pts = 10;
+    if (b.pages) pts += Math.floor(b.pages / 10);
+    pts += (b.rating || 0) * 2;
+    return s + pts;
+  }, 0);
+}
+
+function renderBadges(bookCount) {
+  const html = BADGES.map(b => {
+    const earned = bookCount >= b.threshold;
+    return `<div class="badge ${earned ? 'earned' : ''}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('badgesRow').innerHTML = html;
+}
+
+function saveGoal() {
+  const val = parseInt(document.getElementById('goalInput').value);
+  if (val > 0) {
+    state.players[currentPlayer].goal = val;
+    saveState(state);
+    renderHome();
+  }
+}
+
+// ---- ADD BOOK ----
+function setRating(val) {
+  currentRating = val;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.textContent = i < val ? '⭐' : '☆';
+    btn.classList.toggle('on', i < val);
+  });
+}
+
+function addBook() {
+  const title = document.getElementById('bookTitle').value.trim();
+  if (!title) { alert('Glöm inte att skriva bokens titel! 📖'); return; }
+
+  const book = {
+    id: Date.now(),
+    title,
+    genre: document.getElementById('bookGenre').value,
+    pages: parseInt(document.getElementById('bookPages').value) || 0,
+    rating: currentRating,
+    note: document.getElementById('bookNote').value.trim(),
+    date: new Date().toLocaleDateString('sv-SE'),
+  };
+
+  const prevCount = state.players[currentPlayer].books.length;
+  state.players[currentPlayer].books.push(book);
+  saveState(state);
+
+  // reset form
+  document.getElementById('bookTitle').value = '';
+  document.getElementById('bookPages').value = '';
+  document.getElementById('bookNote').value = '';
+  document.getElementById('bookGenre').selectedIndex = 0;
+  setRating(0);
+
+  renderHome();
+  renderBookList();
+
+  // Check badges
+  const newCount = state.players[currentPlayer].books.length;
+  const newBadge = BADGES.find(b => b.threshold === newCount && newCount > prevCount);
+  if (newBadge) {
+    showCelebration(newBadge.icon, `${newBadge.name}`, `${state.players[currentPlayer].name} har läst ${newCount} böcker! Fantastiskt! 🎊`);
+  } else {
+    const pts = calcPoints([book]);
+    showCelebration('📚', `"${book.title}" inlagd!`, `Du fick +${pts} poäng! Fortsätt läsa! 🌟`);
+  }
+}
+
+// ---- BOOK LIST ----
+function renderBookList() {
+  const p = state.players[currentPlayer];
+  const books = p.books;
+  let html = '';
+  if (books.length === 0) {
+    html = `<div class="empty-state"><div class="emoji">📭</div><p>Inga böcker ännu!<br>Börja lägga till böcker.</p></div>`;
+  } else {
+    [...books].reverse().forEach(b => {
+      const stars = '⭐'.repeat(b.rating) + '☆'.repeat(5 - b.rating);
+      const color = GENRE_COLORS[b.genre] || '#ccc';
+      const icon = GENRE_ICONS[b.genre] || '📖';
+      html += `
+        <div class="book-item">
+          <div class="book-cover" style="background:${color}20;border:2px solid ${color}">${icon}</div>
+          <div class="book-info">
+            <div class="book-title">${escHtml(b.title)}</div>
+            <div class="book-meta">${b.genre} · ${b.pages || '?'} sidor · ${b.date}</div>
+            <div class="book-stars">${stars}</div>
+            ${b.note ? `<div class="book-note">"${escHtml(b.note)}"</div>` : ''}
+          </div>
+          <button class="delete-btn" onclick="deleteBook(${b.id})" title="Ta bort">🗑️</button>
+        </div>`;
+    });
+  }
+  document.getElementById('bookList').innerHTML = html;
+  document.getElementById('bookListCard').querySelector('h2').textContent = `📚 ${p.name}s böcker (${books.length})`;
+}
+
+function deleteBook(id) {
+  if (!confirm('Ta bort den här boken?')) return;
+  state.players[currentPlayer].books = state.players[currentPlayer].books.filter(b => b.id !== id);
+  saveState(state);
+  renderHome();
+  renderBookList();
+}
+
+// ---- QUIZ ----
+function startQuiz() {
+  quizAnswers = [];
+  quizStep = 0;
+  renderQuizStep();
+}
+
+function renderQuizStep() {
+  const container = document.getElementById('quizContent');
+  if (quizStep >= QUIZ_QUESTIONS.length) {
+    showQuizResult();
+    return;
+  }
+  const q = QUIZ_QUESTIONS[quizStep];
+  const progressDots = QUIZ_QUESTIONS.map((_, i) =>
+    `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${i <= quizStep ? 'var(--orange)' : '#eee'};margin:0 3px"></span>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="quiz-progress">${progressDots} Fråga ${quizStep + 1} av ${QUIZ_QUESTIONS.length}</div>
+    <div class="quiz-question">${q.q}</div>
+    ${q.options.map((o, i) => `
+      <button class="btn-quiz" onclick="answerQuiz(${i})">${o.text}</button>
+    `).join('')}
+  `;
+}
+
+function answerQuiz(optIdx) {
+  const q = QUIZ_QUESTIONS[quizStep];
+  quizAnswers.push(...q.options[optIdx].tags);
+  quizStep++;
+  renderQuizStep();
+}
+
+function showQuizResult() {
+  // Count tag frequencies
+  const freq = {};
+  quizAnswers.forEach(t => { freq[t] = (freq[t] || 0) + 1; });
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  const top = sorted.slice(0, 3).map(e => e[0]);
+
+  const GENRE_DESC = {
+    fantasy: { name: 'Fantasy & magi 🧙', desc: 'Du älskar trolldom, drakar och magiska världar! Prova böcker som Narnia, Harry Potter eller svenska fantasyklassiker.' },
+    äventyr: { name: 'Äventyr 🗺️', desc: 'Du gillar spänning och att utforska! Prova äventyrsserier med hjältar som tar sig igenom farliga uppdrag.' },
+    humor: { name: 'Humor & skämt 😂', desc: 'Du älskar att skratta! Prova böcker av Roald Dahl, Martin Widmark eller andra roliga serier.' },
+    fakta: { name: 'Faktaböcker 🔬', desc: 'Du är nyfiken och vill lära dig saker! Prova faktaböcker om rymden, dinosaurier, djur eller historien.' },
+    sport: { name: 'Sportböcker ⚽', desc: 'Du älskar sport! Det finns massor av coola böcker om fotboll, hockey och andra sporter.' },
+    djur: { name: 'Djur & natur 🐾', desc: 'Du älskar djur! Prova böcker om vilda djur, hästar, hundar eller naturäventyr.' },
+    skräck: { name: 'Spänning & skräck 👻', desc: 'Du gillar när det kryper längs ryggraden! Prova spänningsserier för barn.' },
+    deckare: { name: 'Deckare & mysterier 🔍', desc: 'Du är en detektiv i hjärtat! Prova Kalle Blomkvist, Emil i Lönneberga eller moderna deckarserier.' },
+    'sci-fi': { name: 'Sci-fi & rymd 🚀', desc: 'Du drömmer om rymden och framtiden! Prova sci-fi-böcker om robotar, rymdresor och framtida världar.' },
+  };
+
+  const primary = GENRE_DESC[top[0]] || { name: top[0], desc: 'Kul genre!' };
+  const container = document.getElementById('quizContent');
+
+  container.innerHTML = `
+    <div class="quiz-result">
+      <div class="big-emoji">${GENRE_ICONS[top[0]] || '📚'}</div>
+      <h2>Du är en ${primary.name}-läsare!</h2>
+      <p>${primary.desc}</p>
+      <div class="genre-tags">
+        ${top.map(t => `<span class="genre-tag">${GENRE_ICONS[t] || ''} ${t}</span>`).join('')}
+      </div>
+      <button class="btn btn-primary" style="margin-top:24px" onclick="startQuiz()">🔄 Gör om quizet</button>
+    </div>
+  `;
+}
+
+// ---- CELEBRATION ----
+function showCelebration(emoji, title, text) {
+  document.getElementById('celebEmoji').textContent = emoji;
+  document.getElementById('celebTitle').textContent = title;
+  document.getElementById('celebText').textContent = text;
+  document.getElementById('celebration').classList.add('show');
+}
+
+function closeCelebration() {
+  document.getElementById('celebration').classList.remove('show');
+  showSection('home');
+}
+
+// ---- UTILS ----
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
