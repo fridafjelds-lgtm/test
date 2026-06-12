@@ -288,6 +288,31 @@
     .setup-player { text-align: left; }
     .setup-player label { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
 
+    /* REWARDS */
+    .reward-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; background: #fafafa;
+      border-radius: 14px; margin-bottom: 10px;
+      border: 2px solid #f0f0f0;
+    }
+    .reward-milestone {
+      width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--yellow), var(--orange));
+      color: white;
+    }
+    .reward-milestone .m-icon { font-size: 1.3rem; }
+    .reward-milestone .m-num { font-family: 'Fredoka One', cursive; font-size: 0.75rem; }
+    .reward-input-wrap { flex: 1; }
+    .reward-input-wrap label { font-size: 0.8rem; color: #aaa; margin-bottom: 4px; }
+    .reward-input-wrap input { padding: 10px 12px; font-size: 0.95rem; }
+    .reward-saved { font-size: 0.8rem; color: var(--green); font-weight: 700; margin-top: 4px; display: none; }
+
+    .badge .badge-reward {
+      font-size: 0.65rem; color: var(--orange); font-weight: 700;
+      margin-top: 3px; word-break: break-word; max-width: 90px;
+    }
+
     /* EMPTY STATE */
     .empty-state { text-align: center; padding: 40px 20px; color: #bbb; }
     .empty-state .emoji { font-size: 3.5rem; margin-bottom: 12px; }
@@ -440,6 +465,16 @@
     </div>
   </div>
 
+  <!-- REWARDS SECTION -->
+  <div class="section" id="sec-rewards">
+    <div class="card">
+      <h2>🎁 Belöningar</h2>
+      <p style="color:#888;font-size:0.9rem;margin-bottom:16px">Skriv in vad barnet vinner när de når varje milstolpe!</p>
+      <div id="rewardsList"></div>
+      <button class="btn btn-primary" onclick="saveRewards()">💾 Spara belöningar</button>
+    </div>
+  </div>
+
 </main>
 
 <!-- BOTTOM NAV -->
@@ -455,6 +490,9 @@
   </button>
   <button class="nav-btn" id="nav-quiz" onclick="showSection('quiz'); startQuiz()">
     <span class="icon">🎮</span>Quiz
+  </button>
+  <button class="nav-btn" id="nav-rewards" onclick="showSection('rewards'); renderRewards()">
+    <span class="icon">🎁</span>Belöningar
   </button>
 </nav>
 
@@ -544,7 +582,7 @@ let quizAnswers = [];
 let quizStep = 0;
 
 function defaultPlayer(name) {
-  return { name, books: [], goal: 10 };
+  return { name, books: [], goal: 10, rewards: {} };
 }
 
 function loadState() {
@@ -558,6 +596,8 @@ function saveState(state) {
 }
 
 let state = loadState();
+// migrate old saves
+state.players.forEach(p => { if (!p.rewards) p.rewards = {}; });
 
 // ---- SETUP ----
 window.onload = function() {
@@ -650,11 +690,14 @@ function calcPoints(books) {
 }
 
 function renderBadges(bookCount) {
+  const rewards = state.players[currentPlayer].rewards || {};
   const html = BADGES.map(b => {
     const earned = bookCount >= b.threshold;
+    const reward = rewards[b.id] || '';
     return `<div class="badge ${earned ? 'earned' : ''}">
       <div class="badge-icon">${b.icon}</div>
       <div class="badge-name">${b.name}</div>
+      ${reward ? `<div class="badge-reward">🎁 ${escHtml(reward)}</div>` : ''}
     </div>`;
   }).join('');
   document.getElementById('badgesRow').innerHTML = html;
@@ -710,7 +753,9 @@ function addBook() {
   const newCount = state.players[currentPlayer].books.length;
   const newBadge = BADGES.find(b => b.threshold === newCount && newCount > prevCount);
   if (newBadge) {
-    showCelebration(newBadge.icon, `${newBadge.name}`, `${state.players[currentPlayer].name} har läst ${newCount} böcker! Fantastiskt! 🎊`);
+    const reward = (state.players[currentPlayer].rewards || {})[newBadge.id];
+    const rewardText = reward ? `\n🎁 Din belöning: ${reward}` : '';
+    showCelebration(newBadge.icon, `${newBadge.name}`, `${state.players[currentPlayer].name} har läst ${newCount} böcker! Fantastiskt! 🎊${rewardText}`);
   } else {
     const pts = calcPoints([book]);
     showCelebration('📚', `"${book.title}" inlagd!`, `Du fick +${pts} poäng! Fortsätt läsa! 🌟`);
@@ -821,6 +866,35 @@ function showQuizResult() {
       <button class="btn btn-primary" style="margin-top:24px" onclick="startQuiz()">🔄 Gör om quizet</button>
     </div>
   `;
+}
+
+// ---- REWARDS ----
+function renderRewards() {
+  const rewards = state.players[currentPlayer].rewards || {};
+  const html = BADGES.map(b => `
+    <div class="reward-row">
+      <div class="reward-milestone">
+        <div class="m-icon">${b.icon}</div>
+        <div class="m-num">${b.threshold} böcker</div>
+      </div>
+      <div class="reward-input-wrap">
+        <label>Belöning vid ${b.threshold} böcker</label>
+        <input type="text" id="reward_${b.id}" placeholder="T.ex. en ny fotboll... 🎁" maxlength="60" value="${escHtml(rewards[b.id] || '')}">
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('rewardsList').innerHTML = html;
+}
+
+function saveRewards() {
+  if (!state.players[currentPlayer].rewards) state.players[currentPlayer].rewards = {};
+  BADGES.forEach(b => {
+    const val = document.getElementById('reward_' + b.id).value.trim();
+    state.players[currentPlayer].rewards[b.id] = val;
+  });
+  saveState(state);
+  renderHome();
+  showCelebration('💾', 'Belöningar sparade!', 'Nu vet barnet vad som väntar! 🎁');
 }
 
 // ---- CELEBRATION ----
